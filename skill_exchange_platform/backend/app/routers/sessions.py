@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.services.firebase import verify_token
 from app.services import db
+from app.services.moderation import check_content
 from app.schemas.session import SessionCreate, SessionDB
 from app.schemas.message import MessageCreate, MessageDB
 from app.schemas.notification import NotificationCreate
@@ -136,6 +137,8 @@ async def get_messages(session_id: str, uid: str = Depends(get_uid)):
 async def send_message(session_id: str, body: MessageCreate, uid: str = Depends(get_uid)):
     """Store a new chat message. sender_uid from token, receiver derived from session."""
     print(f"[CHAT] POST message  session={session_id}  uid={uid}  text={body.message_text!r}")
+    # ── Content moderation ──
+    await check_content(body.message_text)
     sess = await _get_session_or_403(session_id, uid)
     receiver = sess["user_b_id"] if uid == sess["user_a_id"] else sess["user_a_id"]
     now = datetime.now(timezone.utc)

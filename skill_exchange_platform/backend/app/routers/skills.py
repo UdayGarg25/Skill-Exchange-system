@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from app.services.firebase import verify_token
 from app.services import db  # module import, access db.db
+from app.services.moderation import check_content
 from app.schemas.skill import Skill, SkillDB
 from typing import List, Optional
 from bson import ObjectId
@@ -14,6 +15,10 @@ def get_uid(token_data: dict = Depends(verify_token)):
 
 @router.post("/", response_model=SkillDB)
 async def create_skill(skill: Skill, uid: str = Depends(get_uid)):
+    # ── Content moderation ──
+    await check_content(skill.name)
+    if skill.description and skill.description.strip():
+        await check_content(skill.description)
     doc = skill.dict()
     doc["owner_id"] = uid
     res = await db.db.skills.insert_one(doc)

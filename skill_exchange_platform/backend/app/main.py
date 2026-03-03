@@ -1,11 +1,17 @@
+from dotenv import load_dotenv
+from pathlib import Path
+import os
+
+# Load .env before any service module reads os.getenv()
+_BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(_BASE_DIR / ".env")
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import traceback
 
 from app.services.db import connect_to_mongo, close_mongo_connection
-# routers will be imported after they exist to avoid circular imports
-
 from app.routers import auth, profiles, skills, skill_requests, sessions, chat, ratings, notifications
 
 app = FastAPI(title="Skill Exchange Platform API")
@@ -17,10 +23,14 @@ app.add_middleware(
         "http://localhost:3001",
         "http://localhost:3002",
         "http://localhost:3003",
+        "http://localhost:3004",
+        "http://localhost:3005",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:3001",
         "http://127.0.0.1:3002",
         "http://127.0.0.1:3003",
+        "http://127.0.0.1:3004",
+        "http://127.0.0.1:3005",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -63,3 +73,15 @@ app.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(ratings.router, prefix="/ratings", tags=["ratings"])
 app.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+
+
+# ── Debug: print all registered routes on startup ──────────────────
+@app.on_event("startup")
+async def _debug_print_routes():
+    print("\n[ROUTE AUDIT] Registered routes:")
+    for route in app.routes:
+        methods = getattr(route, "methods", None)
+        path = getattr(route, "path", None)
+        if path and methods:
+            print(f"  {', '.join(methods):8s}  {path}")
+    print("[ROUTE AUDIT] Done.\n")

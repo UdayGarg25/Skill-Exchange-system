@@ -16,22 +16,50 @@ function installInterceptors() {
   if (interceptorsInstalled) return;
   interceptorsInstalled = true;
 
-  // Ensure URLs end with trailing slash to prevent 307 redirects that strip
-  // the Authorization header.  Only touch relative/API paths, not full URLs.
-  axios.interceptors.request.use(config => {
+  // ── Request interceptor ──
+  // 1. Dynamically fetch a fresh Firebase ID token before every request
+  //    (getIdToken() returns the cached token if still valid, or silently
+  //    refreshes it when expired — no extra network call unless needed).
+  // 2. Append trailing slash to prevent 307 redirects that strip the header.
+  axios.interceptors.request.use(async (config) => {
+    // Trailing-slash fix (before token logic so the URL is final for logging)
     if (config.url && !config.url.includes('?') && !config.url.endsWith('/')) {
       config.url = config.url + '/';
     }
+
+    // Skip token injection if the request explicitly opted out
+    if (config._skipAuth) {
+      return config;
+    }
+
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        // getIdToken(false) → returns cached token or refreshes if expired
+        const freshToken = await currentUser.getIdToken(/* forceRefresh */ false);
+        config.headers['Authorization'] = `Bearer ${freshToken}`;
+      } else {
+        // No Firebase user — check for dev token fallback
+        const devToken = localStorage.getItem('dev_token');
+        if (devToken) {
+          config.headers['Authorization'] = `Bearer ${devToken}`;
+        }
+      }
+    } catch (err) {
+      console.error('[API] Failed to get fresh token:', err);
+      // Let the request proceed — backend will return 401 which we handle below
+    }
+
     const tkn = config.headers?.Authorization?.split(' ')[1] || '';
     console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`, {
       baseURL: config.baseURL,
-      hasAuth: config.headers?.Authorization ? 'YES' : 'NO',
+      hasAuth: tkn ? 'YES' : 'NO',
       tokenLength: tkn.length,
     });
     return config;
   });
 
-  // Response interceptor with comprehensive error logging
+  // ── Response interceptor with comprehensive error logging ──
   axios.interceptors.response.use(
     response => {
       console.log(`[API] ${response.status} ${response.config.url}`);
@@ -70,13 +98,36 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // we no longer create profiles manually; backend /profiles/me will auto-generate one if missing
-  const ensureProfile = async () => {
+  // Fetch profile from backend; if the stored email is a fake UID-based one,
+  // patch it with the real Google email via PUT (frontend-only fix, no backend changes).
+  const ensureProfile = async (firebaseUser) => {
     try {
       console.log('[PROFILE] Fetching my profile');
       const res = await axios.get('/profiles/me');
-      console.log('[PROFILE] Profile data:', res.data);
-      return res.data;
+      const profile = res.data;
+      console.log('[PROFILE] Profile data:', profile);
+
+      // Detect stale UID-based email and fix it from the frontend
+      const realEmail = firebaseUser?.email;
+      const realName = firebaseUser?.displayName;
+      const storedEmail = profile?.email || '';
+
+      if (realEmail && storedEmail.endsWith('@skillexchange.local')) {
+        console.log('[PROFILE] Stale email detected, patching with real Google email:', realEmail);
+        const patch = { email: realEmail };
+        if (realName && (!profile.name || profile.name === 'User')) {
+          patch.name = realName;
+        }
+        try {
+          const updated = await axios.put('/profiles/me', patch);
+          console.log('[PROFILE] Patched profile:', updated.data);
+          return updated.data;
+        } catch (patchErr) {
+          console.error('[PROFILE] Patch failed:', patchErr.response?.data || patchErr.message);
+        }
+      }
+
+      return profile;
     } catch (err) {
       // if even the auto-create failed, log but don't crash
       console.error('[PROFILE] Unable to fetch profile:', err.response?.data || err.message);
@@ -98,10 +149,11 @@ export function AuthProvider({ children }) {
           
           setUser(firebaseUser);
           setToken(idToken);
-          axios.defaults.headers.common['Authorization'] = `Bearer ${idToken}`;
+          // Token is now injected dynamically by the axios request interceptor
+          // (calls auth.currentUser.getIdToken() before every request)
           
           // fetch profile (server will auto-create if necessary)
-          await ensureProfile();
+          await ensureProfile(firebaseUser);
         } else {
           // Check for dev token
           const devToken = localStorage.getItem('dev_token');
@@ -110,14 +162,12 @@ export function AuthProvider({ children }) {
             const devUser = { email: 'dev@localhost', displayName: 'Developer', uid: 'dev' };
             setUser(devUser);
             setToken(devToken);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${devToken}`;
-            // fetch dev profile
-            await ensureProfile();
+            // Dev token is picked up by the axios request interceptor from localStorage
+            await ensureProfile(devUser);
           } else {
             console.log('[AUTH] No user logged in');
             setUser(null);
             setToken(null);
-            delete axios.defaults.headers.common['Authorization'];
           }
         }
       } catch (err) {
@@ -146,10 +196,10 @@ export function AuthProvider({ children }) {
       
       setUser(firebaseUser);
       setToken(idToken);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${idToken}`;
+      // Token is injected dynamically by the axios request interceptor
       
       // fetch or create profile
-      await ensureProfile();
+      await ensureProfile(firebaseUser);
     } catch (err) {
       console.error('[AUTH] Google popup sign-in failed:', err);
       const code = err.code || 'unknown';
@@ -167,7 +217,7 @@ export function AuthProvider({ children }) {
     const devUser = { email: 'dev@localhost', displayName: 'Developer', uid: 'dev' };
     setUser(devUser);
     setToken(token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    // Dev token is picked up by the axios request interceptor from localStorage
     console.log('[AUTH] Dev token set successfully');
   };
 
@@ -176,7 +226,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('dev_token');
     setUser(null);
     setToken(null);
-    delete axios.defaults.headers.common['Authorization'];
+    // Interceptor checks auth.currentUser which will be null after signOut
     await signOut(auth);
   };
 

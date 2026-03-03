@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.services.firebase import verify_token
 from app.services import db
+from app.services.moderation import check_content
 from app.schemas.rating import RatingCreate, RatingDB
 from typing import List
 
@@ -52,6 +53,10 @@ async def add_rating(r: RatingCreate, uid: str = Depends(get_uid)):
     })
     if existing:
         raise HTTPException(status_code=400, detail="Already rated")
+    # ── Content moderation ──
+    if r.feedback and r.feedback.strip():
+        await check_content(r.feedback)
+
     doc = r.dict()
     doc["rater_id"] = rater_id
     res = await db.db.ratings.insert_one(doc)

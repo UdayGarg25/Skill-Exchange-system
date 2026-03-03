@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.services.firebase import verify_token
 from app.services import db
+from app.services.moderation import check_content
+from app.services.email_service import send_email
 from app.schemas.skill_request import SkillRequestCreate, SkillRequestDB
 from app.schemas.notification import NotificationCreate
 from typing import List
@@ -19,6 +21,9 @@ async def create_notification(n: NotificationCreate):
 @router.post("/", response_model=SkillRequestDB)
 async def send_request(req: SkillRequestCreate, uid: str = Depends(get_uid)):
     print(f"[REQUESTS] POST /requests called  uid={uid}  payload={req.dict()}")
+    # ── Content moderation ──
+    await check_content(req.skill_offered)
+    await check_content(req.skill_requested)
     if uid == req.to_user_id:
         raise HTTPException(status_code=400, detail="Cannot send request to yourself")
     from_user = await db.db.users.find_one({"_id": uid})
@@ -109,6 +114,27 @@ async def accept_request(request_id: str, uid: str = Depends(get_uid)):
     await create_notification(session_notification)
     session_notification.user_id = req["to_user_id"]
     await create_notification(session_notification)
+
+    # ── Email notification to the request sender ──
+    sender_user = await db.db.users.find_one({"_id": req["from_user_id"]})
+    if sender_user and sender_user.get("email"):
+        acceptor = await db.db.users.find_one({"_id": uid})
+        acceptor_name = acceptor.get("name", "A user") if acceptor else "A user"
+        await send_email(
+            to=sender_user["email"],
+            subject="Skill Exchange Request Accepted",
+            html_body=(
+                f"<h2>Good news!</h2>"
+                f"<p>Hi <strong>{sender_user.get('name', 'there')}</strong>,</p>"
+                f"<p><strong>{acceptor_name}</strong> has accepted your skill exchange request.</p>"
+                f"<p><strong>You offered:</strong> {req.get('skill_offered', 'N/A')}<br>"
+                f"<strong>You requested:</strong> {req.get('skill_requested', 'N/A')}</p>"
+                f"<p>A session has been created automatically. "
+                f"Head over to the platform to start your exchange!</p>"
+                f"<br><p>— Skill Exchange Team</p>"
+            ),
+        )
+
     return updated
 
 

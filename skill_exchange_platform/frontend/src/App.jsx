@@ -9,13 +9,15 @@ import Requests from './pages/Requests';
 import Sessions from './pages/Sessions';
 import Chat from './pages/Chat';
 import Rating from './pages/Rating';
+import Home from './pages/Home';
 import './App.css';
 
 function App() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<Skills />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/skills" element={<Skills />} />
         <Route path="/login" element={<Login />} />
         <Route
           path="/profile"

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from app.services.firebase import verify_token, verify_token_str
 from app.services import db
+from app.services.moderation import check_content
 from datetime import datetime, timezone
 from bson import ObjectId
 
@@ -37,6 +38,13 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
     try:
         while True:
             text = await websocket.receive_text()
+            # ── Content moderation ──
+            try:
+                await check_content(text)
+            except HTTPException:
+                # Notify the sender their message was blocked, but keep connection open
+                await websocket.send_text("[BLOCKED] Inappropriate content detected. Please use respectful language.")
+                continue
             receiver = sess["user_b_id"] if uid == sess.get("user_a_id") else sess["user_a_id"]
             doc = {
                 "session_id": session_id,
