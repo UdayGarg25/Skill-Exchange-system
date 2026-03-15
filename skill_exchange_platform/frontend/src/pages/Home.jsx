@@ -129,7 +129,7 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="hp-hero__stats">
+          {/* <div className="hp-hero__stats">
             <div className="hp-stat">
               <div className="hp-stat__num">5,000+</div>
               <div className="hp-stat__label">Active Students</div>
@@ -142,7 +142,7 @@ export default function Home() {
               <div className="hp-stat__num">15,000+</div>
               <div className="hp-stat__label">Sessions Completed</div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="hp-hero__visual">

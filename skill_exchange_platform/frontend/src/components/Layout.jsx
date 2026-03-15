@@ -23,7 +23,7 @@ export default function Layout({ children }) {
             {/* Logo */}
             <NavLink to="/" className="flex items-center gap-2.5 shrink-0">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 shadow-sm" />
-              <span className="text-lg font-bold text-gray-900 tracking-tight">SkillSwap</span>
+              <span className="text-lg font-bold text-gray-900 tracking-tight">SkillBridge</span>
             </NavLink>
 
             {/* Desktop Nav Links */}
