@@ -22,7 +22,7 @@ Use this checklist to systematically verify all fixes are working correctly.
 ## Authentication Testing
 
 ### Dev Login
-- [ ] Click "Use dev login" button
+- [ ] Click "Dev Login (testing)" button
 - [ ] Should see instant login success
 - [ ] Check console for: `[AUTH] Dev token set successfully`
 - [ ] Check localStorage: `localStorage.contains('dev_token')`

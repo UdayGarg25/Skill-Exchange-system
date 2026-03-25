@@ -119,7 +119,7 @@ uvicorn app.main:app --reload --port 8000
 npm run dev
 
 # Browser: Open http://localhost:3000
-# 1. Click "Use dev login"
+# 1. Click "Dev Login (testing)"
 # 2. Click "Skills"
 # 3. Type skill name and add
 # 4. Watch console for [SKILLS] Skill added successfully

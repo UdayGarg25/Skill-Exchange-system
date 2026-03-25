@@ -7,7 +7,7 @@ class Skill(BaseModel):
     description: Optional[str] = None
 
 
-class SkillDB(Skill):
+class SkillDB(Skill):        
     id: str
     owner_id: str
 

@@ -27,7 +27,7 @@ Visit: http://127.0.0.1:8000/docs
 
 ## Step 3: Test Dev Login
 
-1. Click **"Use dev login"** button
+1. Click **"Dev Login (testing)"** button
 2. Watch console for messages:
    ```
    [AUTH] Logging in with dev token
@@ -95,7 +95,7 @@ Open MongoDB Compass or terminal:
 ```bash
 # Using mongosh if installed
 mongosh
-use skill_exchange_db
+use skill_exchange
 db.users.findOne({"_id": "dev"})
 db.skills.find()
 ```
@@ -201,10 +201,10 @@ fetch('http://127.0.0.1:8000/skills', {
 
 | Issue | Check | Fix |
 |-------|-------|-----|
-| Can't add skill | Console for `[API] Error 401` | Click "Use dev login" |
+| Can't add skill | Console for `[API] Error 401` | Click "Dev Login (testing)" |
 | 404 Not Found | API endpoint name matches | Check backend router paths |
 | Profile won't load | Is MongoDB running? | Start MongoDB service |
-| CORS blocked | Backend CORS config | Should be `allow_origins=["*"]` |
+| CORS blocked | Backend CORS config | Allow localhost/127.0.0.1 frontend ports in `allow_origins` |
 | Token not sent | Look for `hasAuth: YES` in logs | Check localStorage |
 | Chat won't connect | Valid session ID? | Create session first |
 
@@ -241,7 +241,7 @@ INFO:     127.0.0.1:52345 - "GET /skills HTTP/1.1" 200
 8. ✅ Go back to Skills
 9. ✅ Logout (click button in top right)
 10. ✅ Should redirect to login
-11. ✅ Click "Use dev login" again
+11. ✅ Click "Dev Login (testing)" again
 12. ✅ Profile should still exist with your edited name
 
 ## Performance Notes

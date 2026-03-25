@@ -24,8 +24,8 @@ if (!getApps().length) {
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 // optional: always prompt account chooser for debugging
-googleProvider.setCustomParameters({ prompt: 'select_account' });
-
+googleProvider.setCustomParameters({ prompt: 'select_account' }); //Without this: Google may auto-login previous account
+ 
 console.log('[FIREBASE] authDomain =', firebaseConfig.authDomain);
 
 export { auth, googleProvider };

@@ -131,12 +131,11 @@ skill_exchange_platform/
 ├── DOCUMENTATION_INDEX.md           ← This file
 │
 ├── frontend/
-│   └── react-blog/
-│       ├── src/
-│       │   ├── AuthContext.jsx     ← Modified: baseURL, interceptors
-│       │   └── pages/              ← Modified: all with logging
-│       │
-│       └── package.json
+│   ├── src/
+│   │   ├── AuthContext.jsx         ← Modified: baseURL, interceptors
+│   │   └── pages/                  ← Modified: all with logging
+│   │
+│   └── package.json
 │
 └── backend/
     └── app/

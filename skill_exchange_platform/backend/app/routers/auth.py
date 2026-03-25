@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.services.firebase import verify_token
 from app.services import db as db_module
-from app.schemas.user import UserProfileCreate, UserProfileDB
-from bson import ObjectId
+from app.schemas.user import UserProfileDB
 
 router = APIRouter()
 
@@ -13,7 +12,7 @@ async def login_user(user_data: dict = Depends(verify_token)):
     email = user_data.get("email")
     name = user_data.get("name") or ""
 
-    existing = await db_module.db.users.find_one({"_id": uid})
+    existing = await db_module.db.users.find_one({"_id": uid})  
     if existing:
         existing["id"] = str(existing["_id"])
         return existing

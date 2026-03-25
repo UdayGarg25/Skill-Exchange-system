@@ -128,21 +128,6 @@ export default function Home() {
               <BookIcon size={20} />
             </button>
           </div>
-
-          {/* <div className="hp-hero__stats">
-            <div className="hp-stat">
-              <div className="hp-stat__num">5,000+</div>
-              <div className="hp-stat__label">Active Students</div>
-            </div>
-            <div className="hp-stat">
-              <div className="hp-stat__num">200+</div>
-              <div className="hp-stat__label">Skills Available</div>
-            </div>
-            <div className="hp-stat">
-              <div className="hp-stat__num">15,000+</div>
-              <div className="hp-stat__label">Sessions Completed</div>
-            </div>
-          </div> */}
         </div>
 
         <div className="hp-hero__visual">

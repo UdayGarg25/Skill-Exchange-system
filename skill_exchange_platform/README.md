@@ -54,7 +54,7 @@ Optional paid learning is mentioned but not implemented.
    npm install
    npm run dev
    ```
-2. The dev server proxies `/api` to backend port 8000.
+2. Frontend Axios requests use direct backend base URL `http://127.0.0.1:8000` (no `/api` prefix).
 3. Before starting the frontend you should add your Firebase web config to `src/firebase.js`.
    A sample file is already committed – replace the values with your project's.
    The login page uses Google sign‑in and will send the ID token to the backend.
@@ -91,7 +91,7 @@ Collections with primary fields:
 - `skills`: `_id`, `owner_id`, `name`, `description`.
 - `skill_requests`: `_id`, `from_user_id`, `to_user_id`, `skill_offered`, `skill_requested`, `status`.
 - `sessions`: `_id`, `user_a_id`, `user_b_id`, `skill_a`, `skill_b`, `status`.
-- `messages`: `_id`, `session_id`, `sender_id`, `content`, `timestamp`.
+- `messages`: `_id`, `session_id`, `sender_uid`, `receiver_uid`, `message_text`, `timestamp`.
 - `ratings`: `_id`, `session_id`, `rater_id`, `ratee_id`, `score`, `feedback`.
 - `notifications`: `_id`, `user_id`, `type`, `message`, `related_id`, `read`.
 

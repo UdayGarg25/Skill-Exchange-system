@@ -117,7 +117,7 @@ class UserProfileBase(BaseModel):
 
 ### Dev Token Login
 ```
-1. User clicks "Use dev login"
+1. User clicks "Dev Login (testing)"
 2. Token "dev" stored in localStorage
 3. AuthContext sets axios header: Authorization: Bearer dev
 4. ensureProfile() called to create/verify profile

@@ -74,22 +74,21 @@ curl -X GET http://127.0.0.1:8000/skills \
 ```bash
 # Check if user profile exists in MongoDB
 # Using MongoDB CLI
-use skill_exchange_db
+use skill_exchange
 db.users.findOne({"_id": "dev"})
 ```
 
 ### Issue: Problematic Google sign-in flow
 
-**Problem**: Previously we used a popup, but in development the browser often blocks it (especially when Vite switches ports or opens on a random port).
-Starting now the app uses a **redirect-based** sign-in exclusively. This avoids popups entirely and is more reliable in local environments.
+**Problem**: Google popup sign-in can fail if the domain/origin is not authorized in Firebase.
+The app currently uses **popup-based** Google sign-in.
 
 **What to watch for**:
-- When you click "Sign in with Google" the page will navigate to Google and then come back to the same origin.
+- When you click "Sign in with Google" a popup opens for Google authentication.
 - Check the console for:
   ```
-  [AUTH] Starting Google sign-in via redirect
-  [AUTH] Location origin: http://localhost:3001  # or whatever port you're on
-  [AUTH] Redirect result user: user@example.com   # after return
+  [AUTH] Starting Google sign-in via popup
+  [AUTH] Popup login succeeded: user@example.com
   ```
 - If something goes wrong you'll see an alert with the Firebase error code and message.
 
@@ -103,7 +102,7 @@ Starting now the app uses a **redirect-based** sign-in exclusively. This avoids 
 - If you don't care about dynamic ports, kill whatever is using 3000 and restart Vite so it stays on 3000.
 
 **Verify**:
-- After a successful redirect you should see the `[AUTH] Redirect result user:` log and the UI will show you as logged in.
+- After a successful popup login you should see the `[AUTH] Popup login succeeded:` log and the UI will show you as logged in.
 - If you still get an alert, it will contain the error code; follow the guidance above or consult the error documentation at https://firebase.google.com/docs/auth/admin/errors.
 
 ### Issue: CORS Error - Cross-origin request blocked
@@ -163,7 +162,7 @@ curl -X POST http://127.0.0.1:8000/profiles \
 ### 2. Test Frontend Login
 
 1. Go to http://localhost:3000
-2. Click "Use dev login"
+2. Click "Dev Login (testing)"
 3. Open browser DevTools (F12)
 4. Check Console tab - should see:
    - `[AUTH] Logging in with dev token`
@@ -189,8 +188,8 @@ curl -X POST http://127.0.0.1:8000/profiles \
 # List databases
 db.adminCommand({listDatabases: 1})
 
-# Check skill_exchange_db
-use skill_exchange_db
+# Check skill_exchange
+use skill_exchange
 
 # Check collections
 show collections
@@ -227,7 +226,7 @@ Verify these endpoints are working:
 - Should be used directly, NOT through `/api` proxy
 
 ### Backend
-- CORS: Allow all origins (`allow_origins=["*"]`)
+- CORS: Allows localhost and 127.0.0.1 frontend ports (3000-3005)
 - MongoDB: Default localhost:27017
 - Port: 8000
 

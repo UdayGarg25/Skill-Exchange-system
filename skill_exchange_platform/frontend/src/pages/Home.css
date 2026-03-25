@@ -153,26 +153,6 @@
   transform: translateY(-2px);
 }
 
-/* stats row */
-.hp-hero__stats {
-  display: flex;
-  gap: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--hp-border);
-}
-
-.hp-stat__num {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--hp-primary);
-  margin-bottom: 0.25rem;
-}
-
-.hp-stat__label {
-  font-size: 0.875rem;
-  color: var(--hp-text3);
-}
-
 /* floating visual cards */
 .hp-hero__visual {
   position: relative;
@@ -299,6 +279,5 @@
 @media (max-width: 768px) {
   .hp-hero__title { font-size: 2.5rem; }
   .hp-hero__cta   { flex-direction: column; }
-  .hp-hero__stats { gap: 1.5rem; flex-wrap: wrap; }
   .hp-section__title { font-size: 2rem; }
 }

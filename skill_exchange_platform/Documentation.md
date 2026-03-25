@@ -52,7 +52,7 @@ flowchart TD
     B --> D[Firebase Auth]
 ``` 
 
-> The frontend proxies `/api` endpoints to the backend during development.
+> The frontend sends direct requests to `http://127.0.0.1:8000` via Axios base URL (no `/api` prefix).
 
 ## 6. Flowchart Explanation
 
@@ -76,11 +76,11 @@ Interactive docs available at `http://localhost:8000/docs`. Key routes summary i
 Example request/response:
 
 ```http
-POST /api/requests HTTP/1.1
+POST /requests HTTP/1.1
 Authorization: Bearer <token>
 Content-Type: application/json
 
-{ "from_user_id": "uid123", "to_user_id": "uid456", "skill_offered": "Java", "skill_requested": "React" }
+{ "to_user_id": "uid456", "skill_offered": "Java", "skill_requested": "React" }
 ```
 
 ```json

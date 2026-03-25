@@ -131,12 +131,12 @@ localStorage.getItem('dev_token')
 
 | Error | Solution |
 |-------|----------|
-| "Cannot POST /api/skills" | Backend not running or proxy issue |
+| "Cannot POST /skills" | Backend not running or wrong backend URL |
 | No [API] logs | Console not open, logs filtered, or wrong URL |
 | 401 errors | Token not sent (check localStorage) |
-| 404 on /profiles | Profile not created, use dev login |
+| 404 on /profiles | Profile not created, use "Dev Login (testing)" |
 | WebSocket connection fails | Backend not running or wrong URL |
-| CORS error | Backend CORS not configured (should be ["*"]) |
+| CORS error | Backend CORS not configured for localhost/127.0.0.1 frontend ports |
 | No Authorization header | Interceptor not working, check AuthContext |
 
 ### If Something Breaks
@@ -205,7 +205,7 @@ localStorage.clear()
 ### Files to Remember
 
 ```
-react-blog/src/
+frontend/src/
 ├── AuthContext.jsx          ← Token, baseURL, interceptors
 ├── pages/
 │   ├── Skills.jsx           ← [SKILLS] logging

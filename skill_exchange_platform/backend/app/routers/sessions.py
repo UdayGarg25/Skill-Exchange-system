@@ -3,7 +3,7 @@ from app.services.firebase import verify_token
 from app.services import db
 from app.services.moderation import check_content
 from app.schemas.session import SessionCreate, SessionDB
-from app.schemas.message import MessageCreate, MessageDB
+from app.schemas.message import MessageCreate
 from app.schemas.notification import NotificationCreate
 from typing import List
 from datetime import datetime, timezone
