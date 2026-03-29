@@ -24,26 +24,38 @@ async def ai_check(text: str) -> bool:
     """
 
     prompt = f"""
-You are a strict content moderation system.
+You are a strict validator for a skill exchange platform.
 
-Check if the message contains:
-- vulgar language
-- abusive content
-- hate speech
-- sexual content
-- harmful intent
+Your job is to check whether the given input is a valid skill that a person can teach or learn.
+
+Valid skills include:
+- programming (e.g., Java, React)
+- design (e.g., UI/UX, Photoshop)
+- communication (e.g., public speaking)
+- academic subjects (e.g., mathematics, physics)
+- hobbies (e.g., guitar, cooking)
+
+Invalid inputs include:
+- random sentences
+- abusive or harmful text
+- meaningless words
+- unrelated phrases
+
+Rules:
+- Be strict
+- If unsure, mark as UNSAFE
 
 Reply ONLY in JSON:
-{{"status": "SAFE"}}
+{{"status": "PASS"}}
 or
 {{"status": "UNSAFE"}}
 
-Message: "{text}"
+Input: "{text}"
 """
 
     try:
         completion = client.chat.completions.create(
-            model="meta-llama/llama-3.2-3b-instruct:free",
+            model="google/gemini-2.5-flash-lite",
             messages=[
                 {"role": "user", "content": prompt}
             ]
@@ -81,10 +93,10 @@ async def check_content(text: str) -> None:
         )
 
     # ✅ Step 2: AI moderation
-    # is_safe = await ai_check(text)
+    is_safe = await ai_check(text)
 
-    # if not is_safe:
-    #     raise HTTPException(
-    #         status_code=400,
-    #         detail="Message flagged as unsafe.",
-    #     )
+    if not is_safe:
+        raise HTTPException(
+            status_code=400,
+            detail="Message flagged as unsafe.",
+        )
