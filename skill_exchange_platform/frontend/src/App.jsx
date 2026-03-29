@@ -9,6 +9,7 @@ import Sessions from './pages/Sessions';
 import Chat from './pages/Chat';
 import Rating from './pages/Rating';
 import Home from './pages/Home';
+import Admin from './pages/Admin';
 import './App.css';
 
 function App() {
@@ -41,6 +42,10 @@ function App() {
         <Route
           path="/rating/:sessionId"
           element={<ProtectedRoute><Rating /></ProtectedRoute>}
+        />
+        <Route
+          path="/admin"
+          element={<ProtectedRoute><Admin /></ProtectedRoute>}
         />
       </Routes>
     </Layout>

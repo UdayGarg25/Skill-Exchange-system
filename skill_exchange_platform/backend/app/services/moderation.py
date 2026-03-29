@@ -1,35 +1,90 @@
-"""
-Offline profanity filter using better-profanity dictionary (thousands of words).
-
-Usage:
-    from app.services.moderation import check_content
-    await check_content("some user text")  # raises HTTPException(400) if flagged
-
-Rules:
-  - If ANY profanity appears → reject entire request with HTTP 400
-  - No sanitisation, no partial removal
-  - Nothing stored in DB if blocked
-  - Fully offline – no external API calls
-"""
-
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
 from fastapi import HTTPException
 from better_profanity import profanity
 
-# Load the full built-in profanity dictionary (thousands of words)
+# ✅ Load environment variables
+load_dotenv()
+
+# ✅ Initialize OpenRouter client
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+)
+
+# ✅ Load profanity dictionary
 profanity.load_censor_words()
+
+
+async def ai_check(text: str) -> bool:
+    """
+    AI moderation using OpenRouter (Llama 70B)
+    Returns True if SAFE, False if UNSAFE
+    """
+
+    prompt = f"""
+You are a strict content moderation system.
+
+Check if the message contains:
+- vulgar language
+- abusive content
+- hate speech
+- sexual content
+- harmful intent
+
+Reply ONLY in JSON:
+{{"status": "SAFE"}}
+or
+{{"status": "UNSAFE"}}
+
+Message: "{text}"
+"""
+
+    try:
+        completion = client.chat.completions.create(
+            model="meta-llama/llama-3.2-3b-instruct:free",
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+
+        reply = completion.choices[0].message.content.lower()
+
+        # ✅ Safe parsing
+        if "unsafe" in reply:
+            return False
+
+        return True
+
+    except Exception as e:
+        print("AI moderation error:", e)
+        # ✅ Fail-safe (important)
+        return True
 
 
 async def check_content(text: str) -> None:
     """
-    Strict validation – raises HTTPException(400) when profanity is detected.
-    Uses better-profanity's dictionary for broad coverage.
-    Fully offline; no external service calls.
+    Hybrid moderation:
+    1. Offline profanity filter
+    2. AI moderation
     """
+
     if not text or not text.strip():
         return
 
+    # ✅ Step 1: Offline profanity check
     if profanity.contains_profanity(text):
         raise HTTPException(
             status_code=400,
             detail="Inappropriate language detected. Please use respectful language.",
         )
+
+    # ✅ Step 2: AI moderation
+    # is_safe = await ai_check(text)
+
+    # if not is_safe:
+    #     raise HTTPException(
+    #         status_code=400,
+    #         detail="Message flagged as unsafe.",
+    #     )

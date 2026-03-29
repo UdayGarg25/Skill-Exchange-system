@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 import traceback
 
 from app.services.db import connect_to_mongo, close_mongo_connection
-from app.routers import auth, profiles, skills, skill_requests, sessions, chat, ratings, notifications
+from app.routers import auth, profiles, skills, skill_requests, sessions, chat, ratings, notifications,admin
 
 app = FastAPI(title="Skill Exchange Platform API")
 
@@ -72,7 +72,7 @@ app.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(ratings.router, prefix="/ratings", tags=["ratings"])
 app.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
-
+app.include_router(admin.router, prefix="/admin", tags=["admin"])
 
 # ── Debug: print all registered routes on startup ──────────────────
 @app.on_event("startup")

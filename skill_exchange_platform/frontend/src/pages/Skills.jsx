@@ -4,9 +4,10 @@ import { useAuth } from "../AuthContext";
 import SendRequestModal from "../components/SendRequestModal";
 import PageContainer from "../components/ui/PageContainer";
 import { formatReputation } from "../utils/formatReputation";
+import { MoreVertical } from "lucide-react";
 
 export default function Skills() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [skills, setSkills] = useState([]);
   const [ownerProfiles, setOwnerProfiles] = useState({});
   const [search, setSearch] = useState("");
@@ -15,6 +16,20 @@ export default function Skills() {
   const [error, setError] = useState("");
   const [requestingSkill, setRequestingSkill] = useState(null); // skill to request
   const [reqLoading, setReqLoading] = useState(false);
+  const [deletingSkillId, setDeletingSkillId] = useState("");
+  const [openMenuSkillId, setOpenMenuSkillId] = useState("");
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      const clickedInsideMenu = event.target.closest("[data-skill-menu-root]");
+      if (!clickedInsideMenu) {
+        setOpenMenuSkillId("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
 
   const fetchSkills = async () => {
     setLoading(true);
@@ -89,6 +104,48 @@ export default function Skills() {
       setLoading(false);
     }
   };
+
+  const handleDelete = async (skill) => {
+    const skillId = skill.id || skill._id;
+    if (!skillId) {
+      alert("Unable to delete: skill id is missing.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this skill?"
+    );
+    if (!confirmed) return;
+
+    setDeletingSkillId(skillId);
+    setOpenMenuSkillId("");
+    setError("");
+
+    try {
+      const config = token
+        ? { headers: { Authorization: `Bearer ${token}` } }
+        : {};
+
+      await axios.delete(`/skills/${skillId}`, config);
+
+      // Update UI immediately without reloading the page
+      setSkills((prev) =>
+        prev.filter((item) => (item.id || item._id) !== skillId)
+      );
+    } catch (e) {
+      console.error("[SKILLS] Delete skill error:", {
+        status: e.response?.status,
+        message: e.response?.data?.detail || e.message,
+        url: e.config?.url,
+      });
+      const msg = e.response?.data?.detail || "Failed to delete skill";
+      setError(msg);
+      alert(msg);
+    } finally {
+      setDeletingSkillId("");
+    }
+  };
+
   return (
     <PageContainer>
       {/* HERO */}
@@ -140,11 +197,44 @@ export default function Skills() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {skills.map((s) => {
             const ownerProfile = ownerProfiles[s.owner_id];
+            const skillId = s.id || s._id;
+            const isOwner = user && s.owner_id === user.uid;
             return (
               <div
-                key={s.id}
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 p-5 border border-gray-100 group"
+                key={skillId || s.name}
+                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 p-5 border border-gray-100 group relative"
               >
+                {isOwner && (
+                  <div
+                    className="absolute top-3 right-3"
+                    data-skill-menu-root
+                  >
+                    <button
+                      onClick={() =>
+                        setOpenMenuSkillId(
+                          openMenuSkillId === skillId ? "" : skillId
+                        )
+                      }
+                      className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                      aria-label="Open skill actions"
+                    >
+                      <MoreVertical size={18} />
+                    </button>
+
+                    {openMenuSkillId === skillId && (
+                      <div className="absolute right-0 mt-1 w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1">
+                        <button
+                          onClick={() => handleDelete(s)}
+                          disabled={deletingSkillId === skillId}
+                          className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                        >
+                          {deletingSkillId === skillId ? "Deleting..." : "Delete"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <h3 className="text-base font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors duration-200">
                   {s.name}
                 </h3>
@@ -175,14 +265,14 @@ export default function Skills() {
                 )}
 
                 <div className="mt-5 pt-4 border-t border-gray-50">
-                  {user && s.owner_id !== user.uid ? (
+                  {user && !isOwner ? (
                     <button
                       onClick={() => setRequestingSkill(s)}
                       className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg font-medium transition-colors duration-200"
                     >
                       Request Exchange
                     </button>
-                  ) : user && s.owner_id === user.uid ? (
+                  ) : isOwner ? (
                     <div className="text-center py-2 text-xs text-gray-400 font-medium">
                       Your Skill
                     </div>

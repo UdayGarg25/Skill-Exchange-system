@@ -12,7 +12,7 @@ async def login_user(user_data: dict = Depends(verify_token)):
     email = user_data.get("email")
     name = user_data.get("name") or ""
 
-    existing = await db_module.db.users.find_one({"_id": uid})  
+    existing = await db_module.db.users.find_one({"_id": uid})
     if existing:
         existing["id"] = str(existing["_id"])
         return existing
