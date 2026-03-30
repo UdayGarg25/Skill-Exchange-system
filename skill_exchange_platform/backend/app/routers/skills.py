@@ -5,7 +5,7 @@ from app.services.moderation import check_content
 from app.schemas.skill import Skill, SkillDB
 from typing import List, Optional
 from bson import ObjectId
-    
+
 router = APIRouter()
 
 

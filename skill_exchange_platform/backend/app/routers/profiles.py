@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.services.firebase import verify_token
 from app.services import db as db_module
-from app.services.moderation import check_content
+from app.services.moderation import check_chat_rating
 from app.schemas.user import UserProfileUpdate, UserProfileDB
 
 router = APIRouter()
@@ -76,9 +76,9 @@ async def create_profile(
 
     # ── Content moderation ──
     if data.name and data.name.strip():
-        await check_content(data.name)
+        await check_chat_rating(data.name)
     if data.availability and data.availability.strip():
-        await check_content(data.availability)
+        await check_chat_rating(data.availability)
 
     existing = await db_module.db.users.find_one({"_id": uid})
     if existing:
@@ -106,9 +106,9 @@ async def update_profile(
     uid = token_data.get("uid")
     # ── Content moderation ──
     if data.name and data.name.strip():
-        await check_content(data.name)
+        await check_chat_rating(data.name)
     if data.availability and data.availability.strip():
-        await check_content(data.availability)
+        await check_chat_rating(data.availability)
 
     update_data = {k: v for k, v in data.dict().items() if v is not None}
     if not update_data:

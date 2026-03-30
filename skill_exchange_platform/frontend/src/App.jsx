@@ -6,10 +6,10 @@ import Profile from './pages/Profile';
 import Skills from './pages/Skills';
 import Requests from './pages/Requests';
 import Sessions from './pages/Sessions';
-import Chat from './pages/Chat';
 import Rating from './pages/Rating';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
+import ChatInbox from './pages/ChatInbox';
 import './App.css';
 
 function App() {
@@ -33,11 +33,11 @@ function App() {
         />
         <Route
           path="/chat"
-          element={<ProtectedRoute><Chat /></ProtectedRoute>}
+          element={<ProtectedRoute><ChatInbox /></ProtectedRoute>}
         />
         <Route
           path="/chat/:sessionId"
-          element={<ProtectedRoute><Chat /></ProtectedRoute>}
+          element={<ProtectedRoute><ChatInbox /></ProtectedRoute>}
         />
         <Route
           path="/rating/:sessionId"

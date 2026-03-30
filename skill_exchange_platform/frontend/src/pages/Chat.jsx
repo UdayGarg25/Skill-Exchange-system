@@ -4,8 +4,9 @@ import axios from '../api';
 import { useAuth } from '../AuthContext';
 import PageContainer from '../components/ui/PageContainer';
 
-export default function Chat() {
-  const { sessionId } = useParams();
+export default function Chat({ sessionId: propSessionId }) {
+  const { sessionId: urlSessionId } = useParams();
+  const sessionId = propSessionId || urlSessionId; // Use prop first, fallback to URL
   const { token, user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [session, setSession] = useState(null);

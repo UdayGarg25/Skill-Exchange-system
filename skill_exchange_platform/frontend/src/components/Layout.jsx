@@ -30,6 +30,7 @@ export default function Layout({ children }) {
             <div className="hidden md:flex items-center gap-1">
               <NavLink to="/" end className={linkClass}>Home</NavLink>
               <NavLink to="/skills" className={linkClass}>Skills</NavLink>
+              <NavLink to="/chat" className={linkClass}>Chat</NavLink>
               {user && (
                 <>
                   <NavLink to="/requests" className={linkClass}>Requests</NavLink>
@@ -94,6 +95,9 @@ export default function Layout({ children }) {
             </NavLink>
             <NavLink to="/skills" className={linkClass} onClick={() => setMobileOpen(false)}>
               Skills
+            </NavLink>
+            <NavLink to="/chat" className={linkClass} onClick={() => setMobileOpen(false)}>
+              Chat
             </NavLink>
             {user ? (
               <>

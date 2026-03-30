@@ -100,3 +100,22 @@ async def check_content(text: str) -> None:
             status_code=400,
             detail="Message flagged as unsafe.",
         )
+    
+
+async def check_chat_rating(text: str) -> None:
+    """
+    Hybrid moderation:
+    1. Offline profanity filter
+    2. AI moderation
+    """
+
+    if not text or not text.strip():
+        return
+
+    # ✅ Step 1: Offline profanity check
+    if profanity.contains_profanity(text):
+        raise HTTPException(
+            status_code=400,
+            detail="Inappropriate language detected. Please use respectful language.",
+        )
+    
