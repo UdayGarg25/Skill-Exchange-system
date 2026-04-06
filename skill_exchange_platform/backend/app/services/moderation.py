@@ -98,7 +98,7 @@ async def check_content(text: str) -> None:
     if not is_safe:
         raise HTTPException(
             status_code=400,
-            detail="Message flagged as unsafe.",
+            detail="Invalid input. Please enter a valid skill (e.g., Python, React, Machine Learning).",
         )
     
 

@@ -93,7 +93,7 @@ export default function ChatInbox() {
   }
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden">
+    <div className="flex p-8 h-[calc(100vh-65px)] bg-white overflow-hidden">
       {/* Left Panel: Chat List - Hidden on mobile when chat is open */}
       <div
         className={`${
