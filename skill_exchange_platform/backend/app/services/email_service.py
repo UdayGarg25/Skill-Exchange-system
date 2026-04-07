@@ -17,6 +17,8 @@ import os
 import smtplib
 import asyncio
 from email.message import EmailMessage
+from dotenv import load_dotenv
+load_dotenv()
 
 _EMAIL_ADDRESS: str | None = os.getenv("EMAIL_ADDRESS")
 _EMAIL_PASSWORD: str | None = os.getenv("EMAIL_PASSWORD")
