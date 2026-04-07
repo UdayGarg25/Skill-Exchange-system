@@ -7,21 +7,22 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 # safe to call multiple times (fastapi reload).
 if not firebase_admin._apps:
     try:
-        # compute credential path relative to this file so it works regardless of cwd
         import os
-        base_dir = os.path.dirname(__file__)
-        cred_path = os.path.join(base_dir, "serviceAccountKey.json")
-        print(f"[FIREBASE] initializing admin sdk with {cred_path}")
-        cred = credentials.Certificate(cred_path)
-        firebase_admin.initialize_app(cred)
-        print("[FIREBASE] admin sdk initialized")
-    except FileNotFoundError:
-        # running in local dev without credentials; token verification will fail if used
-        print(f"WARNING: Firebase service account file not found at {cred_path}. "
-              "Token verification will not work until you provide one.")
+
+        # 🔥 Render secret file path
+        cred_path = "/etc/secrets/serviceAccountKey.json"
+
+        print(f"[FIREBASE] trying to load from {cred_path}")
+
+        if os.path.exists(cred_path):
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+            print("[FIREBASE] admin sdk initialized ✅")
+        else:
+            print("[FIREBASE] No serviceAccountKey.json found → skipping ⚠️")
+
     except Exception as e:
-        # other initialization errors
-        print(f"Firebase initialization error: {e}")
+        print(f"[FIREBASE] initialization error: {e}")
 
 security = HTTPBearer()
 
