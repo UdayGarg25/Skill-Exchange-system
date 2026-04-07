@@ -30,6 +30,7 @@ app.add_middleware(
         "http://127.0.0.1:3003",
         "http://127.0.0.1:3004",
         "http://127.0.0.1:3005",
+        "https://skill-exchange-system.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
